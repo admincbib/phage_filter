@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Credits: Grigorii Sukhorukov, Macha Nikolski
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "6"
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -65,14 +65,13 @@ def train_nn(
             min_delta=0.000001, cooldown=3, ),
     ]
     try:
-        f = h5py.File(Path(ds_path, f"encoded_phage_train_{length}.hdf5"), "r")
+        f = h5py.File(Path(ds_path, f"encoded_train_{length}.hdf5"), "r")
         fragments = f["fragments"]
         fragments_rc = f["fragments_rc"]
         labels = f["labels"]
     except FileNotFoundError:
         raise Exception("dataset was not found. Change ds_path or launch prepare_ds script")
-    print(f'using {random_seed} random_seed in batch generation')
-    print(np.shape(fragments))
+    # print(f'using {random_seed} random_seed in batch generation')
     train_gen, val_gen = fetch_batches(fragments,
                                        fragments_rc,
                                        labels,
@@ -91,32 +90,34 @@ def train_nn(
               epochs=1,
               batch_size=batch_size,
               verbose=2)
-    model.save_weights(Path(out_path, "model_10.h5"))
-    print('finished training model_10 network')
+    model.save_weights(Path(out_path, f"model_{length}.h5"))
 
 
-
-
-def train(config):
-    with open(config, "r") as yamlfile:
-        cf = yaml.load(yamlfile, Loader=yaml.FullLoader)
-
-    assert Path(cf["train"]["ds_path"]).exists(), f'{cf["prepare_ds"]["ds_path"]} does not exist'
-
-    Path(cf["train"]["out_path"], "500").mkdir(parents=True, exist_ok=True)
-    Path(cf["train"]["out_path"], "1000").mkdir(parents=True, exist_ok=True)
-
+def train(ds_path, out_path, epochs, random_seed):
+    assert Path(ds_path).exists(), f'{ds_path} does not exist'
+    Path(out_path).mkdir(parents=True, exist_ok=True)
     for l_ in 500, 1000:
         train_nn(
-            ds_path=Path(cf["train"]["ds_path"], f"{l_}"),
-            out_path=Path(cf["train"]["out_path"], f"{l_}"),
+            ds_path=ds_path,
+            out_path=out_path,
             length=l_,
-            epochs=cf["train"]["epochs"],
-            random_seed=cf["train"]["random_seed"],
+            epochs=epochs,
+            random_seed=random_seed,
         )
         print(f"finished training NN  for {l_} fragment size\n")
     print(f"NN weights are stored in {cf['train']['out_path']}")
 
 
+def train_config(config):
+    with open(config, "r") as yamlfile:
+        cf = yaml.load(yamlfile, Loader=yaml.FullLoader)
+    train(
+        ds_path=cf["train"]["ds_path"],
+        out_path=cf["train"]["out_path"],
+        epochs=cf["train"]["epochs"],
+        random_seed=cf["train"]["random_seed"],
+    )
+
+
 if __name__ == '__main__':
-    fire.Fire(train)
+    fire.Fire(train_config)

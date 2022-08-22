@@ -11,7 +11,6 @@ import fire
 import yaml
 from Bio import SeqIO
 import random
-import ray
 import numpy as np
 from utils import preprocess as pp
 from sklearn.utils import shuffle
@@ -21,10 +20,9 @@ from pathlib import Path
 
 def prepare_ds_nn(
         path_virus,
-        path_phages,
+        path_other,
         out_path,
         fragment_length,
-        n_cpus=1,
         random_seed=None,
 ):
     """
@@ -40,11 +38,11 @@ def prepare_ds_nn(
 
     v_encoded, v_encoded_rc, v_labs, v_seqs, v_n_frags = pp.prepare_ds_fragmenting(
         in_seq=path_virus, label='virus', label_int=1, fragment_length=fragment_length,
-        sl_wind_step=int(fragment_length / 2), max_gap=0.05, n_cpus=n_cpus)
+        sl_wind_step=int(fragment_length / 2), max_gap=0.05,)
 
     ph_encoded, ph_encoded_rc, ph_labs, ph_seqs, ph_n_frags = pp.prepare_ds_sampling(
-        in_seqs=path_phages, fragment_length=fragment_length,
-        n_frags=v_n_frags, label='phages', label_int=0, random_seed=random.randrange(1000000))
+        in_seqs=path_other, fragment_length=fragment_length,
+        n_frags=v_n_frags, label='other', label_int=0, random_seed=random.randrange(1000000))
 
     assert v_n_frags == ph_n_frags
 
@@ -59,30 +57,35 @@ def prepare_ds_nn(
 
     # saving one-hot encoded fragments
     pp.storing_encoded(all_encoded, all_encoded_rc, all_labs,
-                       Path(out_path, f"encoded_phage_train_{fragment_length}.hdf5"))
+                       Path(out_path, f"encoded_train_{fragment_length}.hdf5"))
 
 
-def prepare_ds(config):
-    with open(config, "r") as yamlfile:
-        cf = yaml.load(yamlfile, Loader=yaml.FullLoader)
-
-    assert Path(cf["prepare_ds"]["path_virus"]).exists(), f'{cf["prepare_ds"]["path_virus"]} does not exist'
-    assert Path(cf["prepare_ds"]["path_phages"]).exists(), f'{cf["prepare_ds"]["path_phages"]} does not exist'
-
-    Path(cf["prepare_ds"]["out_path"], "500").mkdir(parents=True, exist_ok=True)
-    Path(cf["prepare_ds"]["out_path"], "1000").mkdir(parents=True, exist_ok=True)
+def prepare_ds(path_virus, path_other, out_path, random_seed):
+    assert Path(path_virus).exists(), f'{path_virus} does not exist'
+    assert Path(path_other).exists(), f'{path_other} does not exist'
+    Path(out_path).mkdir(parents=True, exist_ok=True)
 
     for l_ in 500, 1000:
         prepare_ds_nn(
-            path_virus=cf["prepare_ds"]["path_virus"],
-            path_phages=cf["prepare_ds"]["path_phages"],
-            out_path=Path(cf["prepare_ds"]["out_path"], f"{l_}"),
+            path_virus=path_virus,
+            path_other=path_other,
+            out_path=out_path,
             fragment_length=l_,
-            n_cpus=cf["prepare_ds"]["n_cpus"],
-            random_seed=cf["prepare_ds"]["random_seed"],
+            random_seed=random_seed,
         )
-    print(f"NN datasets are stored in {cf['prepare_ds']['out_path']}")
+    print(f"NN datasets are stored in {out_path}")
+
+
+def prepare_ds_config(config):
+    with open(config, "r") as yamlfile:
+        cf = yaml.load(yamlfile, Loader=yaml.FullLoader)
+    prepare_ds(
+        path_virus=cf["prepare_ds"]["path_virus"],
+        path_other=cf["prepare_ds"]["path_phages"],
+        out_path=cf["prepare_ds"]["out_path"],
+        random_seed=cf["prepare_ds"]["random_seed"],
+    )
 
 
 if __name__ == '__main__':
-    fire.Fire(prepare_ds)
+    fire.Fire(prepare_ds_config)
