@@ -5,6 +5,8 @@ weights/
 .weights/
 test_installation/
 test_installation_out/
+ds/
+prediction/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

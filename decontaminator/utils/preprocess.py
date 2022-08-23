@@ -167,7 +167,7 @@ def label_fasta_fragments(sequences, label):
     Output:
     labeled_fragments - list with labeled SeqRecord sequences
     """
-    assert label in ["virus", "plant", "bacteria"]
+    # assert label in ["virus", "plant", "bacteria"]
     labeled_fragments = []
     for sequence in sequences:
         sequence.id = sequence.id + f"_{label}"
@@ -343,8 +343,8 @@ def prepare_ds_fragmenting(in_seq, label, label_int, fragment_length, sl_wind_st
     # generating viral fragments and labels
     seqs = list(SeqIO.parse(in_seq, "fasta"))
     frags, frags_rc, seqs_ = fragmenting(seqs, fragment_length, max_gap=max_gap, sl_wind_step=sl_wind_step)
-    encoded = one_hot_encode.remote(frags)
-    encoded_rc = one_hot_encode.remote(frags_rc)
+    encoded = one_hot_encode(frags)
+    encoded_rc = one_hot_encode(frags_rc)
     labs = prepare_labels(frags, label=label_int, label_depth=2)
     seqs_ = label_fasta_fragments(seqs_, label=label)
     # subsetting to unique fragments
@@ -362,11 +362,10 @@ def prepare_ds_fragmenting(in_seq, label, label_int, fragment_length, sl_wind_st
 def prepare_ds_sampling(in_seqs, fragment_length, n_frags, label, label_int, random_seed,  n_cpus=1, limit=100):
     # generating plant fragments and labels
     seqs_list = prepare_seq_lists(in_seqs, n_frags)
-    it = chunks(seqs_list, int(len(seqs_list) / n_cpus + 1))
-    frags, frags_rc, seqs_ = sample_fragments.remote(seqs_list, fragment_length, random_seed, limit=limit, max_gap=0.05)
+    frags, frags_rc, seqs_ = sample_fragments(seqs_list, fragment_length, random_seed, limit=limit, max_gap=0.05)
     frags, frags_rc, seqs_ = shuffle(frags, frags_rc, seqs_, random_state=random_seed, n_samples=int(n_frags))
-    encoded = one_hot_encode.remote(frags)
-    encoded_rc = one_hot_encode.remote(frags_rc)
+    encoded = one_hot_encode(frags)
+    encoded_rc = one_hot_encode(frags_rc)
     labs = prepare_labels(frags, label=label_int, label_depth=2)
     seqs_ = label_fasta_fragments(seqs_, label=label)
     assert (np.shape(encoded)[0] == np.shape(encoded_rc)[0])

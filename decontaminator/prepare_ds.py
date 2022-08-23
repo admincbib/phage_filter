@@ -81,7 +81,7 @@ def prepare_ds_config(config):
         cf = yaml.load(yamlfile, Loader=yaml.FullLoader)
     prepare_ds(
         path_virus=cf["prepare_ds"]["path_virus"],
-        path_other=cf["prepare_ds"]["path_phages"],
+        path_other=cf["prepare_ds"]["path_other"],
         out_path=cf["prepare_ds"]["out_path"],
         random_seed=cf["prepare_ds"]["random_seed"],
     )

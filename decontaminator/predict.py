@@ -148,7 +148,7 @@ def predict_config(config):
         weights=cf['predict']['weights'],
         out_path=cf['predict']['out_path'],
         return_viral=cf['predict']['return_viral'],
-        limit=0,
+        limit=cf['predict']['limit'],
     )
 
 
