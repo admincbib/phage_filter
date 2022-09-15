@@ -1,0 +1,8 @@
+predict:
+    test_ds:
+    weights:
+    out_path:
+
+# test_ds: path to the input file with contigs in fasta format
+# weights: path to the folder containing weights for the filtering
+# out_path: path to the folder to store predictions

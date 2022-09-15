@@ -32,8 +32,8 @@ def predict_nn(ds_path, nn_weights_path, length, batch_size=256):
         "id": [],
         "length": [],
         "fragment": [],
-        "pred_vir_10": [],
-        "pred_phage_10": [],
+        "pred_vir": [],
+        "pred_other": [],
     }
     if not seqs_:
         raise ValueError("All sequences were smaller than length of the model")
@@ -75,7 +75,7 @@ def predict_contigs(df):
     df['decision'] = np.where(df['virus'] >= df['other'], 'virus', 'other')
     df = df.sort_values(by='length', ascending=False)
     df = df.loc[:, ['length', 'id', 'virus', 'other', 'decision']]
-    df = df.rename(columns={'virus': '# viral fragments', 'phage': '# other fragments',})
+    df = df.rename(columns={'virus': '# viral fragments', 'other': '# other fragments',})
     df['# viral / # total'] = (df['# viral fragments'] / (
                 df['# viral fragments'] + df['# other fragments'])).round(3)
     df['# viral / # total * length'] = df['# viral / # total'] * df['length']
@@ -84,7 +84,7 @@ def predict_contigs(df):
 
 
 def predict(test_ds, weights, out_path, return_viral, limit):
-    """Predicts viral contigs from the fasta file
+    """filters out contaminant contigs from the fasta file.
 
     test_ds: path to the input file with contigs in fasta format (str or list of str)
     weights: path to the folder containing weights for NN and RF modules trained on 500 and 1000 fragment lengths (str)
@@ -144,10 +144,10 @@ def predict_config(config):
     with open(config, "r") as yamlfile:
         cf = yaml.load(yamlfile, Loader=yaml.FullLoader)
     predict(
-        test_ds=cf['predict']['out_path'],
+        test_ds=cf['predict']['test_ds'],
         weights=cf['predict']['weights'],
         out_path=cf['predict']['out_path'],
-        return_viral=cf['predict']['return_viral'],
+        return_viral=True,
         limit=cf['predict']['limit'],
     )
 

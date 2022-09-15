@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Credits: Grigorii Sukhorukov, Macha Nikolski
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "7"
+os.environ["CUDA_VISIBLE_DEVICES"] = "6"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_cpu_global_jit"
 # loglevel : 0 all printed, 1 I not printed, 2 I and W not printed, 3 nothing printed
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -105,7 +105,7 @@ def train(ds_path, out_path, epochs, random_seed):
             random_seed=random_seed,
         )
         print(f"finished training NN  for {l_} fragment size\n")
-    print(f"NN weights are stored in {cf['train']['out_path']}")
+    print(f"NN weights are stored in {out_path}")
 
 
 def train_config(config):
