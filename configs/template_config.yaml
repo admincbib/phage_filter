@@ -1,0 +1,24 @@
+predict:
+    test_ds: # path to the input file with contigs in fasta format
+    weights: # folder containing weights for the model
+    out_path: # where to save predictions
+
+predict2:
+    test_ds: # path to the input file with contigs in fasta format
+    weights1: # folder containing weights for the first model
+    weights2: # folder containing weights for the second model
+    out_path: # where to save predictions
+
+prepare_ds:
+    path_virus: # path to fasta file with viral sequences
+    path_other: # path to fasta file with plant sequences
+    out_path: # where to save training dataset for neural networks (in hdf5 format)
+    random_seed: None # random seed. None is default for randomly selected seed (int)
+
+train:
+    ds_path: # path to the dataset prepared with prepare_ds_nn.py
+    out_path: # where to save weights of the trained neural networks
+    epochs: # Number of epochs for each neural network to train
+    random_seed: None # random seed. None is default for randomly selected seed (int)
+
+

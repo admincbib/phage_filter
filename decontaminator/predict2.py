@@ -39,7 +39,6 @@ def predict2(test_ds, weights1, weights2, out_path):
     assert Path(test_ds[0]).exists(), f'{test_ds[0]} does not exist'
     assert Path(weights1).exists(), f'{weights1} does not exist'
     assert Path(weights2).exists(), f'{weights2} does not exist'
-    assert isinstance(limit, int), 'limit should be an integer'
     Path(out_path).mkdir(parents=True, exist_ok=True)
 
     pr.predict(

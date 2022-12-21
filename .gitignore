@@ -1,4 +1,5 @@
 # Test out folder
+configs/decontaminator.yaml
 toy_dataset/
 toy_dataset_out/
 weights/

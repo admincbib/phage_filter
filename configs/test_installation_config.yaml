@@ -1,0 +1,18 @@
+prepare_ds:
+    path_virus: test_installation/virus.fasta
+    path_other: test_installation/bacteria.fasta
+    out_path: test_installation_out/bacteria_filter
+    random_seed: 5
+
+train:
+    ds_path: test_installation_out/bacteria_filter
+    out_path: test_installation_out/bacteria_filter
+    epochs: 10
+    random_seed: 5
+
+predict:
+    test_ds:
+        - test_installation/bacteria.fasta
+        - test_installation/virus.fasta
+    weights: test_installation_out/bacteria_filter
+    out_path: test_installation_out/bacteria_filter
