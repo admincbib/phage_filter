@@ -1,5 +1,5 @@
 prepare_ds:
-    path_virus: test_installation/virus.fasta
+    path_virus: test_installation/viruses.fasta
     path_other: test_installation/bacteria.fasta
     out_path: test_installation_out/bacteria_filter
     random_seed: 5
@@ -13,6 +13,6 @@ train:
 predict:
     test_ds:
         - test_installation/bacteria.fasta
-        - test_installation/virus.fasta
+        - test_installation/viruses.fasta
     weights: test_installation_out/bacteria_filter
     out_path: test_installation_out/bacteria_filter
