@@ -61,6 +61,39 @@ def predict_nn(ds_path, nn_weights_path, length, batch_size=256):
     return df
 
 
+def predict_test(ds_path, length):
+    """
+    Breaks down contigs into fragments
+    and gives 1 as prediction to all fragments
+    use only for testing!
+    """
+    try:
+        seqs_ = list(SeqIO.parse(ds_path, "fasta"))
+    except FileNotFoundError:
+        raise Exception("test dataset was not found. Change ds variable")
+
+    out_table = {
+        "id": [],
+        "length": [],
+        "fragment": [],
+    }
+    if not seqs_:
+        raise ValueError("All sequences were smaller than length of the model")
+    for seq in seqs_:
+        fragments_, fragments_rc, _ = pp.fragmenting([seq], length, max_gap=0.8,
+                                                     sl_wind_step=int(length / 2))
+        for j in range(len(fragments_)):
+            out_table["id"].append(seq.id)
+            out_table["length"].append(len(seq.seq))
+            out_table["fragment"].append(j)
+    print('Exporting predictions to csv file')
+    df = pd.DataFrame(out_table)
+    df['pred_vir'] = 1
+    df['pred_other'] = 0
+    df['NN_decision'] = 'virus'
+    return df
+
+
 def predict_contigs(df):
     """
     Based on predictions of predict_rf for fragments gives a final prediction for the whole contig
@@ -106,16 +139,23 @@ def predict(test_ds, weights, out_path, return_viral, limit):
     assert isinstance(limit, int), 'limit should be an integer'
     Path(out_path).mkdir(parents=True, exist_ok=True)
 
+    # parameter to activate test function. Only for debugging on github
+    # test is launched when the weights directory is empty
+    use_test_f = Path(weights, 'model_1000.h5').exists()
+
     for ts in test_ds:
         dfs_fr = []
         dfs_cont = []
         for l_ in 500, 1000:
             print(f'starting prediction for {Path(ts).name} for fragment length {l_}')
-            df = predict_nn(
-                ds_path=ts,
-                nn_weights_path=weights,
-                length=l_,
-            )
+            if use_test_f:
+                df = predict_test(ds_path=ts, length=l_,)
+            else:
+                df = predict_nn(
+                    ds_path=ts,
+                    nn_weights_path=weights,
+                    length=l_,
+                )
             dfs_fr.append(df)
             df = predict_contigs(df)
             dfs_cont.append(df)

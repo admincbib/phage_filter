@@ -23,7 +23,7 @@ Otherwise, the commands to install and activate the environment are below.
 
 ```shell
 conda env create -f envs/environment.yml
-conda activate Decontaminator
+conda activate decontaminator
 ```
 
 ### Testing your installation of Decontaminator
@@ -44,16 +44,12 @@ bash scripts/test_installation.sh
 
 To run Decontaminator you should use the already pre-trained models or train Decontaminator yourself (described in the next section).
 Pre-trained model weights are already available for filtering of phages and fungi. 
-You can download them using the `download_weights.sh` script.
-
-```shell
-bash scripts/download_weights.sh 
-```
+The weights are located in the `weights` folder.
 
 Before launching the prediction you will need to fill the `configs/predict_config.yaml` file. 
 If for example, you want to use the weights of the pretrained model for fungi, 
 you should change the field `weights` in the `configs/predict_config.yaml` to `weights/fungi`.
-Otherwise, if you want to use both filters, you should fill in the `configs/predict2_config.yaml`.
+Otherwise, if you want to use consecutively both available filters, you should fill in the `configs/predict2_config.yaml`.
 
 Decontaminator supports prediction for multiple test files at once. 
 For that you need to change a bit the field `test_ds` in the
@@ -70,9 +66,9 @@ predict:
 Once the config file is ready, you can start the prediction:
 
 ```shell
-python Decontaminator/predict.py configs/predict_config.yaml
+python decontaminator/predict.py configs/predict_config.yaml
 # or
-python Decontaminator/predict2.py configs/predict2_config.yaml
+python decontaminator/predict2.py configs/predict2_config.yaml
 ```
 
 After prediction Decontaminator produces two `csv` files and one `fasta` file:
@@ -98,11 +94,11 @@ This file contains final predictions for contigs calculated from the previous fi
 You can train your own model, for example for a specific contamination. Before training, you need to collect sequence 
 data for training for three reference datasets: _viruses_ and _other_. 
 Examples are provided by running `scripts/download_test_installation.sh` that will download `viruses.fasta` and
-`other.fasta` files.
+`bacteria.fasta` files for testing the installation.
 
 Training requires execution of the following steps:
-- prepare the training dataset for the neural network and Random Forest modules from fasta files with `prepare_ds.py`.
-- train the neural network and Random Forest modules with `train.py`
+- prepare the training dataset for the neural network with `prepare_ds.py`.
+- train the neural network with `train.py`
 
 The training will be done twice - for fragment sizes of 500 and 1000.
 
@@ -112,11 +108,11 @@ To execute the steps of the training you must first create a copy of the `templa
 Then fill in the necessary parts of the config file. No need to fill in all tasks! 
 Once config file is filled you can launch the scripts consecutively providing them with the config file like this:
 ```shell
-python Decontaminator/prepare_ds.py configs/config.yaml
+python decontaminator/prepare_ds.py configs/config.yaml
 ```
 And then
 ```shell
-python Decontaminator/train.py configs/config.yaml
+python decontaminator/train.py configs/config.yaml
 ```
 Important to note, the suggested number of epochs for the training of neural networks is 10.
 
@@ -125,7 +121,7 @@ Important to note, the suggested number of epochs for the training of neural net
 If you plan to train Decontaminator on GPU, please use `environment_gpu.yml` or `requirements_gpu.txt` for dependencies installation.
 Those recipes were tested only on the Linux cluster with multiple GPUs.
 If you plan to train Decontaminator on cluster with multiple GPUs, you will need to uncomment line with
-`CUDA_VISIBLE_DEVICES` variable and replace `""` with `"N"` in header of `train_nn.py`, where N is the number of GPU you want to use.
+`CUDA_VISIBLE_DEVICES` variable and replace `""` with `"N"` in header of `train.py`, where N is the number of GPU you want to use:
 
 ```python
 import os
