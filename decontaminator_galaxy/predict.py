@@ -104,7 +104,7 @@ def predict_contigs(df):
         .unstack(fill_value=0)
     )
     df = df.reset_index()
-    df = df.reindex(['length', 'id', 'virus', 'other',], axis=1)
+    df = df.reindex(['length', 'id', 'virus', 'other',], axis=1).fillna(value=0)
     df['decision'] = np.where(df['virus'] >= df['other'], 'virus', 'other')
     df = df.sort_values(by='length', ascending=False)
     df = df.loc[:, ['length', 'id', 'virus', 'other', 'decision']]
@@ -116,14 +116,13 @@ def predict_contigs(df):
     return df
 
 
-def predict(test_ds, weights, out_path, return_viral, limit):
+def predict(test_ds, weights, out_path, return_viral=True):
     """filters out contaminant contigs from the fasta file.
 
     test_ds: path to the input file with contigs in fasta format (str or list of str)
     weights: path to the folder containing weights for NN and RF modules trained on 500 and 1000 fragment lengths (str)
     out_path: path to the folder to store predictions (str)
     return_viral: whether to return contigs annotated as viral in separate fasta file (True/False)
-    limit: Do predictions only for contigs > l. We suggest l=750. (int)
     """
 
     test_ds = test_ds
@@ -135,13 +134,13 @@ def predict(test_ds, weights, out_path, return_viral, limit):
         raise ValueError('test_ds was incorrectly assigned in the config file')
 
     assert Path(test_ds[0]).exists(), f'{test_ds[0]} does not exist'
-    assert Path(weights).exists(), f'{weights} does not exist'
-    assert isinstance(limit, int), 'limit should be an integer'
+    # assert Path(weights).exists(), f'{weights} does not exist'
+    limit = 0
     Path(out_path).mkdir(parents=True, exist_ok=True)
 
     # parameter to activate test function. Only for debugging on github
     # test is launched when the weights directory is empty
-    use_test_f = Path(weights, 'model_1000.h5').exists()
+    use_test_f = not Path(weights, 'model_1000.h5').exists()
 
     for ts in test_ds:
         dfs_fr = []
@@ -160,13 +159,13 @@ def predict(test_ds, weights, out_path, return_viral, limit):
             df = predict_contigs(df)
             dfs_cont.append(df)
             print('prediction finished')
-        df_500 = dfs_fr[0][(dfs_fr[0]['length'] >= 750) & (dfs_fr[0]['length'] < 1500)]
+        df_500 = dfs_fr[0][(dfs_fr[0]['length'] >= limit) & (dfs_fr[0]['length'] < 1500)]
         df_1000 = dfs_fr[1][(dfs_fr[1]['length'] >= 1500)]
         df = pd.concat([df_1000, df_500], ignore_index=True)
         pred_fr = Path(out_path, f"{Path(ts).stem}_predicted_fragments.csv")
         df.to_csv(pred_fr)
 
-        df_500 = dfs_cont[0][(dfs_cont[0]['length'] >= 750) & (dfs_cont[0]['length'] < 1500)]
+        df_500 = dfs_cont[0][(dfs_cont[0]['length'] >= limit) & (dfs_cont[0]['length'] < 1500)]
         df_1000 = dfs_cont[1][(dfs_cont[1]['length'] >= 1500)]
         df = pd.concat([df_1000, df_500], ignore_index=True)
         pred_contigs = Path(out_path, f"{Path(ts).stem}_predicted.csv")
@@ -179,18 +178,5 @@ def predict(test_ds, weights, out_path, return_viral, limit):
             SeqIO.write(viral_seqs, Path(out_path, f"{Path(ts).stem}_viral.fasta"), 'fasta')
 
 
-
-def predict_config(config):
-    with open(config, "r") as yamlfile:
-        cf = yaml.load(yamlfile, Loader=yaml.FullLoader)
-    predict(
-        test_ds=cf['predict']['test_ds'],
-        weights=cf['predict']['weights'],
-        out_path=cf['predict']['out_path'],
-        return_viral=True,
-        limit=0,
-    )
-
-
 if __name__ == '__main__':
-    fire.Fire(predict_config)
+    fire.Fire(predict)
