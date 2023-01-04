@@ -4,7 +4,7 @@
 To be used standalone or with VirHunter.
 
 ## Useful Info
-Decontamintor goes well along with [VirHunter](https://github.com/cbib/virhunter). If you want to know a bit more about the two of them check out this [presentation](https://github.com/cbib/virhuntermedia/virhunter_description.pdf).
+Decontamintor goes well along with [VirHunter](https://github.com/cbib/virhunter). If you want to know a bit more about the two of them check out this [presentation](https://github.com/cbib/virhunter/blob/main/media/virhunter_description.pdf).
 
 ## System Requirements
 Decontaminator installation requires a Unix environment with [python 3.8](http://www.python.org/). 
