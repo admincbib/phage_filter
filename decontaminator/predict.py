@@ -71,7 +71,7 @@ def predict_contigs(df):
         .unstack(fill_value=0)
     )
     df = df.reset_index()
-    df = df.reindex(['length', 'id', 'virus', 'other',], axis=1)
+    df = df.reindex(['length', 'id', 'virus', 'other',], axis=1).fillna(value=0)
     df['decision'] = np.where(df['virus'] >= df['other'], 'virus', 'other')
     df = df.sort_values(by='length', ascending=False)
     df = df.loc[:, ['length', 'id', 'virus', 'other', 'decision']]
