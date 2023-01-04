@@ -3,6 +3,9 @@
 **Decontaminator** is a deep learning helping tool that filters out phage or fungi contigs from plant virome RNAseq assemblies. 
 To be used standalone or with VirHunter.
 
+## Useful Info
+Decontamintor goes well along with [VirHunter](https://github.com/cbib/virhunter). If you want to know a bit more about the two of them check out this [presentation](https://github.com/cbib/virhuntermedia/virhunter_description.pdf).
+
 ## System Requirements
 Decontaminator installation requires a Unix environment with [python 3.8](http://www.python.org/). 
 It was tested on Linux and macOS (M1 not tested).
@@ -43,8 +46,13 @@ bash scripts/test_installation.sh
 ## Using Decontaminator for prediction
 
 To run Decontaminator you should use the already pre-trained models or train Decontaminator yourself (described in the next section).
-Pre-trained model weights are already available for filtering of phages and fungi. 
-The weights are located in the `weights` folder.
+Pre-trained model weights are already available for filtering of phages and fungi. To download them please launch the script:
+
+```shell
+bash scripts/download_weights.sh 
+```
+
+The weights will be located in the `weights` folder.
 
 Before launching the prediction you will need to fill the `configs/predict_config.yaml` file. 
 If for example, you want to use the weights of the pretrained model for fungi, 
