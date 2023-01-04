@@ -155,8 +155,8 @@ def predict(test_ds, weights, out_path, return_viral=True):
                     nn_weights_path=weights,
                     length=l_,
                 )
-            dfs_fr.append(df)
-            df = predict_contigs(df)
+            dfs_fr.append(df.round(3))
+            df = predict_contigs(df).round(3)
             dfs_cont.append(df)
             print('prediction finished')
         df_500 = dfs_fr[0][(dfs_fr[0]['length'] >= limit) & (dfs_fr[0]['length'] < 1500)]
