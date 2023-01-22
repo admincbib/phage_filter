@@ -1,4 +1,5 @@
 # Decontaminator
+![Decontaminator logo](media/logo.png?raw=true "Decontaminator logo")
 
 **Decontaminator** is a deep learning helping tool that filters out phage or fungi contigs from plant virome RNAseq assemblies. 
 To be used standalone or with VirHunter.
